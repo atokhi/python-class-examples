@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 import time
+import random
 screen = pygame.display.set_mode((600,600))
 class ship:
     def __init__(self, x, y, width, height, color):
@@ -39,6 +40,7 @@ class bullets:
             self.x <= enemy.x + int(enemy.width) and\
             self.y <= enemy.y + int(enemy.height):
                 print("enemy_hit")
+                enemy.height -= 10
                 bullet_list.remove(self)
         if self.y < 0 or self.y > 600:
             bullet_list.remove(self)
@@ -46,6 +48,8 @@ class bullets:
 blue = (0,0,255)
 green = (0,255,0)
 player = ship(300, 550, 50, 50, green)
+
+computerMove = False
 playerShot = False
 enemyShot = False
 moveLeft = False
@@ -61,6 +65,16 @@ while True:
     screen.fill((0,0,0))
     player.draw()
     enemy.draw()
+    if computerMove == True:
+        if currentTime - moveTime >= 1:
+            movement = random.randint(-20, 20)
+            bullet = bullets(enemy.x + int(enemy.width/2), enemy.y + enemy.height)
+            enemyBullets.append(bullet)
+            enemy.moveShip(movement)
+            computerMove = False
+    if computerMove == False:
+        moveTime = time.time()
+        computerMove = True
     if moveLeft:
         player.moveShip(-1)
     if moveRight:
@@ -70,6 +84,10 @@ while True:
             i.draw()
             i.move(-1)
             i.checkCollision(enemy, playerBullets)
+    for i in enemyBullets:
+        i.draw()
+        i.move(1)
+        i.checkCollision(player, enemyBullets)
     for i in range(player.bullets):
         pygame.draw.rect(screen, (255,0,0), (5 + i * 4, 570, 3, 5))
     if reloadStart == True:
@@ -82,6 +100,11 @@ while True:
                 moveLeft = True
             if event.key == K_d:
                 moveRight = True
+            if event.key == K_w:
+                if reloadStart == False and player.bullets > 0:
+                    player.bullets -= 1
+                    playerBullets.append(bullets(player.x + int(player.width/2), player.y))
+                    playerShot = True
             if event.key == K_r:
                 if reloadStart == False:
                     print("Reloading")
