@@ -46,6 +46,7 @@ class bullets:
             bullet_list.remove(self)
 
 blue = (0,0,255)
+colored = (1,125,250)
 green = (0,255,0)
 player = ship(300, 550, 50, 50, green)
 
@@ -59,12 +60,23 @@ playerBullets = []
 enemyBullets = []
 reloadTime = 2
 enemy = ship(300, 0, 50, 50, blue)
+enemylist = []
+for i in range(10):
+    tex = random.randint(0, 580)
+    tey = random.randint(70, 540) 
+    tinyenemy = ship(tex, tey, 20, 10, colored)
+    enemylist.append(tinyenemy)
 while True:
+    print(playerBullets)
     currentTime = time.time()
     pygame.display.update()
     screen.fill((0,0,0))
     player.draw()
     enemy.draw()
+    for te in enemylist:
+        if te.height == 0:
+            enemylist.remove(te)
+        te.draw()
     if computerMove == True:
         if currentTime - moveTime >= 1:
             movement = random.randint(-20, 20)
@@ -83,7 +95,10 @@ while True:
         for i in playerBullets:
             i.draw()
             i.move(-1)
+            for te in enemylist:
+                i.checkCollision(te, playerBullets)
             i.checkCollision(enemy, playerBullets)
+            
     for i in enemyBullets:
         i.draw()
         i.move(1)
