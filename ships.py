@@ -43,7 +43,8 @@ class bullets:
                 enemy.height -= 10
                 bullet_list.remove(self)
         if self.y < 0 or self.y > 600:
-            bullet_list.remove(self)
+            if self in bullet_list:
+                bullet_list.remove(self)
 
 blue = (0,0,255)
 colored = (1,125,250)
@@ -67,7 +68,6 @@ for i in range(10):
     tinyenemy = ship(tex, tey, 20, 10, colored)
     enemylist.append(tinyenemy)
 while True:
-    print(playerBullets)
     currentTime = time.time()
     pygame.display.update()
     screen.fill((0,0,0))
