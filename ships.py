@@ -4,12 +4,13 @@ import time
 import random
 screen = pygame.display.set_mode((600,600))
 class ship:
-    def __init__(self, x, y, width, height, color):
+    def __init__(self, x, y, width, height, health, color):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.color = color
+        self.health = health
         self.bullets = 5
 
     def draw(self):
@@ -22,6 +23,14 @@ class ship:
             self.x = 600 - self.width
         if self.x <= 0:
             self.x = 0
+    def moveToSpot(self, newlocation):
+        if self.x < newlocation:
+            self.x +=1
+        elif self.x > newlocation:
+            self.x -= 1
+        else:
+            return True
+        return False
 
 
 class bullets:
@@ -40,7 +49,7 @@ class bullets:
             self.x <= enemy.x + int(enemy.width) and\
             self.y <= enemy.y + int(enemy.height):
                 print("enemy_hit")
-                enemy.height -= 10
+                enemy.health -= 1
                 bullet_list.remove(self)
         if self.y < 0 or self.y > 600:
             if self in bullet_list:
@@ -49,7 +58,7 @@ class bullets:
 blue = (0,0,255)
 colored = (1,125,250)
 green = (0,255,0)
-player = ship(300, 550, 50, 50, green)
+player = ship(300, 550, 50, 50, 5, green)
 
 computerMove = False
 playerShot = False
@@ -60,30 +69,35 @@ reloadStart = False
 playerBullets = []
 enemyBullets = []
 reloadTime = 2
-enemy = ship(300, 0, 50, 50, blue)
+enemy = ship(300, 0, 50, 50, 5,blue)
 enemylist = []
+new_location = 0
+reach_location = True
 for i in range(10):
     tex = random.randint(0, 580)
     tey = random.randint(70, 540) 
-    tinyenemy = ship(tex, tey, 20, 10, colored)
+    tinyenemy = ship(tex, tey, 20, 10, 1,colored)
     enemylist.append(tinyenemy)
 while True:
     currentTime = time.time()
     pygame.display.update()
     screen.fill((0,0,0))
     player.draw()
-    enemy.draw()
+    if enemy.health > 0:
+        enemy.draw()
     for te in enemylist:
-        if te.height == 0:
+        if te.health == 0:
             enemylist.remove(te)
         te.draw()
     if computerMove == True:
-        if currentTime - moveTime >= 1:
-            movement = random.randint(-20, 20)
+        if currentTime - moveTime >= 1 and enemy.health > 0:
+            if reach_location == True:
+                new_location = random.randint(50, 550)//5 * 5
+                reach_location = False
             bullet = bullets(enemy.x + int(enemy.width/2), enemy.y + enemy.height)
             enemyBullets.append(bullet)
-            enemy.moveShip(movement)
             computerMove = False
+        reach_location = enemy.moveToSpot(new_location)
     if computerMove == False:
         moveTime = time.time()
         computerMove = True
@@ -121,7 +135,7 @@ while True:
                     playerBullets.append(bullets(player.x + int(player.width/2), player.y))
                     playerShot = True
             if event.key == K_r:
-                if reloadStart == False:
+                if reloadStart == False and player.bullets != 5:
                     print("Reloading")
                     reloadStart = True
                     startTime = time.time()
